@@ -11,11 +11,20 @@ test("POST /transactions saves a transaction", async () => {
   const payload = { amount: 120.5, description: "Internet bill" };
 
   const postResponse = await request(app).post("/transactions").send(payload);
+  const getResponse = await request(app).get("/transactions");
 
   assert.equal(postResponse.status, 201);
   assert.equal(postResponse.body.message, "Transaction created successfully.");
   assert.equal(postResponse.body.transaction.amount, payload.amount);
   assert.equal(postResponse.body.transaction.description, payload.description);
+
+  // Check that the transaction was actually saved.
+  assert.equal(getResponse.status, 200);
+  assert.equal(getResponse.body.length, 1);
+  assert.equal(getResponse.body[0].amount, payload.amount);
+  assert.equal(getResponse.body[0].description, payload.description);
+  assert.ok(getResponse.body[0].id);
+  assert.ok(getResponse.body[0].createdAt);
   assert.equal(transactions.length, 1);
 });
 
